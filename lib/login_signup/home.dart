@@ -1,6 +1,9 @@
 import 'dart:math' as math;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'dart:io' show Platform;
 
 class Home extends StatefulWidget {
   const Home({super.key, required this.userEmail});
@@ -19,6 +22,9 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
+  late GoogleMapController? _mapController;
+  
+  final Set<Marker> _markers = {};
 
   // Données de démonstration des bateaux
   final List<Boat> _boats = [
@@ -110,6 +116,25 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     );
 
     _animationController.forward();
+    
+    // Initialiser les marqueurs pour chaque bateau
+    _initializeMarkers();
+  }
+  
+  void _initializeMarkers() {
+    for (var boat in _boats) {
+      _markers.add(
+        Marker(
+          markerId: MarkerId(boat.id),
+          position: LatLng(boat.latitude, boat.longitude),
+          infoWindow: InfoWindow(
+            title: boat.name,
+            snippet: 'Capitaine: ${boat.captain}',
+          ),
+          onTap: () => _showBoatDetails(boat),
+        ),
+      );
+    }
   }
 
   @override
@@ -614,88 +639,24 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   }
 
   Widget _buildMapView() {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Colors.blue[100]!,
-            Colors.blue[50]!,
-          ],
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-        ),
+    // Google Maps fonctionne sur Android, iOS et Web
+    return GoogleMap(
+      onMapCreated: (GoogleMapController controller) {
+        _mapController = controller;
+      },
+      initialCameraPosition: CameraPosition(
+        target: LatLng(36.0, 10.5), // Centre de la Tunisie
+        zoom: 7.5,
       ),
-      child: Stack(
-        children: [
-          // Placeholder for map (you would integrate Google Maps or similar here)
-          Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.map_rounded,
-                  size: 100,
-                  color: Colors.blue[300],
-                ),
-                const SizedBox(height: 20),
-                Text(
-                  'Vue Carte',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.blue[700],
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  'Intégration Google Maps à venir',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.blue[600],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          // Boat markers overlay
-          ..._filteredBoats.map((boat) => _buildBoatMarker(boat)),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBoatMarker(Boat boat) {
-    // Simple representation - in real app, position based on lat/long
-    final random = math.Random(boat.id.hashCode);
-    final left = random.nextDouble() * 300;
-    final top = random.nextDouble() * 400 + 50;
-
-    return Positioned(
-      left: left,
-      top: top,
-      child: GestureDetector(
-        onTap: () => _showBoatDetails(boat),
-        child: Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: _getStatusColor(boat.status),
-            shape: BoxShape.circle,
-            border: Border.all(color: Colors.white, width: 3),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.3),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: const Icon(
-            Icons.directions_boat,
-            color: Colors.white,
-            size: 20,
-          ),
-        ),
-      ),
+      markers: _markers,
+      mapType: MapType.normal,
+      myLocationEnabled: true,
+      myLocationButtonEnabled: true,
+      zoomControlsEnabled: true,
+      scrollGesturesEnabled: true,
+      zoomGesturesEnabled: true,
+      tiltGesturesEnabled: true,
+      rotateGesturesEnabled: true,
     );
   }
 

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "882819855244",
+    "project_id": "prima2",
+    "storage_bucket": "prima2.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:882819855244:android:24fff60a20431abe405ca9",
+        "android_client_info": {
+          "package_name": "com.example.primafish"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDHEuq-MAU-qnSegx21ZMJXvGmjOt77s30"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

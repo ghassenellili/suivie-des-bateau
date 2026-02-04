@@ -112,37 +112,63 @@ class _LoginState extends State<Login> with SingleTickerProviderStateMixin {
         return;
       }
 
-      // Simulate a slight delay for better UX
-      await Future.delayed(const Duration(milliseconds: 500));
+      // Vérifier avec Firebase Authentication
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
+      );
 
-      // Navigate with a smoother transition
-      Navigator.pushReplacement(
-        context,
-        PageRouteBuilder(
-          pageBuilder: (context, animation, secondaryAnimation) => 
-              Home(userEmail: _emailController.text.trim()),
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            const begin = Offset(0.0, 0.1);
-            const end = Offset.zero;
-            const curve = Curves.easeOutCubic;
-            var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-            var offsetAnimation = animation.drive(tween);
-            
-            var fadeAnimation = Tween<double>(begin: 0.0, end: 1.0)
-                .animate(CurvedAnimation(parent: animation, curve: curve));
-            
-            return FadeTransition(
-              opacity: fadeAnimation,
-              child: SlideTransition(position: offsetAnimation, child: child),
-            );
-          },
-          transitionDuration: const Duration(milliseconds: 800),
+      // Authentification réussie, naviguer vers la page Home
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          PageRouteBuilder(
+            pageBuilder: (context, animation, secondaryAnimation) => 
+                Home(userEmail: _emailController.text.trim()),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              const begin = Offset(0.0, 0.1);
+              const end = Offset.zero;
+              const curve = Curves.easeOutCubic;
+              var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+              var offsetAnimation = animation.drive(tween);
+              
+              var fadeAnimation = Tween<double>(begin: 0.0, end: 1.0)
+                  .animate(CurvedAnimation(parent: animation, curve: curve));
+              
+              return FadeTransition(
+                opacity: fadeAnimation,
+                child: SlideTransition(position: offsetAnimation, child: child),
+              );
+            },
+            transitionDuration: const Duration(milliseconds: 800),
+          ),
+        );
+      }
+    } on FirebaseAuthException catch (e) {
+      String errorMessage = "Une erreur s'est produite. Veuillez réessayer.";
+      if (e.code == 'user-not-found') {
+        errorMessage = "Aucun compte trouvé avec cet email.";
+      } else if (e.code == 'wrong-password') {
+        errorMessage = "Mot de passe incorrect.";
+      } else if (e.code == 'invalid-email') {
+        errorMessage = "Format d'email invalide.";
+      } else if (e.code == 'user-disabled') {
+        errorMessage = "Ce compte a été désactivé.";
+      } else if (e.code == 'too-many-requests') {
+        errorMessage = "Trop de tentatives de connexion. Réessayez plus tard.";
+      }
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(errorMessage),
+          backgroundColor: Colors.redAccent,
+          behavior: SnackBarBehavior.floating,
         ),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Une erreur inattendue s'est produite."),
+        SnackBar(
+          content: Text("Erreur : ${e.toString()}"),
           backgroundColor: Colors.redAccent,
           behavior: SnackBarBehavior.floating,
         ),
@@ -714,13 +740,6 @@ class _LoginState extends State<Login> with SingleTickerProviderStateMixin {
       ),
     );
   }
-}
-
-class FirebaseAuth {
-  static get instance => null;
-}
-
-class UserCredential {
 }
 
 // Custom painter for animated wave pattern in background

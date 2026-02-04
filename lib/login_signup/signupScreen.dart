@@ -6,7 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:primafish/login_signup/home.dart';
-import 'package:primafish/login_signup/loginScreen.dart' hide FirebaseAuth;
+import 'package:primafish/login_signup/loginScreen.dart';
 
 class SignUp extends StatefulWidget {
   const SignUp({super.key});
@@ -21,7 +21,6 @@ class _SignUpState extends State<SignUp> with SingleTickerProviderStateMixin {
   final _confirmPasswordController = TextEditingController();
   final _securityKeyController = TextEditingController();
   
-  bool _isAdmin = false;
   bool _isLoading = false;
   bool _showPassword = false;
   bool _showConfirmPassword = false;
