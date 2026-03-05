@@ -9,10 +9,10 @@ pipeline {
     
     environment {
         // Configuration Docker Registry
-        DOCKER_REGISTRY = 'docker.io'
-        DOCKER_USERNAME = credentials('docker-username')
-        DOCKER_TOKEN = credentials('docker-token')
-        
+       DOCKER_REGISTRY = 'docker.io'
+    DOCKER_USERNAME = 'ghassenellili123'
+    DOCKER_TOKEN = credentials('ghassenellili123')
+    // ...autres variables
         // Noms des images
         IMAGE_NAME = "${DOCKER_REGISTRY}/${DOCKER_USERNAME}/flutter-app"
         IMAGE_TAG = "${BUILD_NUMBER}"
